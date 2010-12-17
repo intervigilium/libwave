@@ -99,7 +99,8 @@ public class WaveWriter {
     }
 
     /**
-     * Read audio data from input file (mono)
+     * Write audio data to output file (mono). Does
+     * nothing if output file is not mono channel.
      *
      * @param src  mono audio data input buffer
      * @param bufferSize  buffer size in number of samples
@@ -107,9 +108,33 @@ public class WaveWriter {
      * @throws IOException if file I/O error occurs
      */
     public void write(short[] src, int bufferSize) throws IOException {
+        if (channels != 1) {
+            return;
+        }
         for (int i = 0; i < bufferSize; i++) {
             writeUnsignedShortLE(this.outputStream, src[i]);
             bytesWritten += 2;
+        }
+    }
+
+    /**
+     * Write audio data to output file (stereo). Does
+     * nothing if output file is not stereo channel.
+     *
+     * @param left  left channel audio data buffer
+     * @param right  right channel audio data buffer
+     * @param bufferSize  buffer size in number of samples
+     *
+     * @throws IOException if file I/O error occurs
+     */
+    public void write(short[] left, short[] right, int bufferSize) throws IOException {
+        if (channels != 2) {
+            return;
+        }
+        for (int i = 0; i < bufferSize; i++) {
+            writeUnsignedShortLE(this.outputStream, left[i]);
+            writeUnsignedShortLE(outputStream, right[i]);
+            bytesWritten += 4;
         }
     }
 
