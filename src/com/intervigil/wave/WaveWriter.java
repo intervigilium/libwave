@@ -157,33 +157,22 @@ public class WaveWriter {
 
         int bytesPerSec = (sampleBits + 7) / 8;
 
-        file.writeBytes("RIFF"); // wave label
-        file.writeInt(Integer.reverseBytes(bytesWritten + 36)); // length in
-                                                                // bytes without
-                                                                // header
-        file.writeBytes("WAVEfmt ");
-        file.writeInt(Integer.reverseBytes(16)); // length of pcm format
-                                                 // declaration area
-        file.writeShort(Short.reverseBytes((short) 1)); // is PCM
-        file.writeShort(Short.reverseBytes((short) channels)); // number of
-                                                               // channels, this
-                                                               // is mono
-        file.writeInt(Integer.reverseBytes(sampleRate)); // sample rate, this is
-                                                         // probably 22050 Hz
-        file
-                .writeInt(Integer.reverseBytes(sampleRate * channels
-                        * bytesPerSec)); // bytes per second
-        file.writeShort(Short.reverseBytes((short) (channels * bytesPerSec))); // bytes
-                                                                               // per
-                                                                               // sample
-                                                                               // time
-        file.writeShort(Short.reverseBytes((short) sampleBits)); // bits per
-                                                                 // sample, this
-                                                                 // is 16 bit
-                                                                 // pcm
-        file.writeBytes("data"); // data section label
-        file.writeInt(Integer.reverseBytes(bytesWritten)); // length of raw pcm
-                                                           // data in bytes
+        file.writeBytes("RIFF"); // WAV chunk header
+        file.writeInt(Integer.reverseBytes(bytesWritten + 36)); // WAV chunk size
+        file.writeBytes("WAVE"); // WAV format
+
+        file.writeBytes("fmt "); // format subchunk header
+        file.writeInt(Integer.reverseBytes(16)); // format subchunk size
+        file.writeShort(Short.reverseBytes((short) 1)); // audio format
+        file.writeShort(Short.reverseBytes((short) channels)); // number of channels
+        file.writeInt(Integer.reverseBytes(sampleRate)); // sample rate
+        file.writeInt(Integer.reverseBytes(sampleRate * channels * bytesPerSec)); // byte rate
+        file.writeShort(Short.reverseBytes((short) (channels * bytesPerSec))); // block align
+        file.writeShort(Short.reverseBytes((short) sampleBits)); // bits per sample
+
+        file.writeBytes("data"); // data subchunk header
+        file.writeInt(Integer.reverseBytes(bytesWritten)); // data subchunk size
+
         file.close();
         file = null;
     }
