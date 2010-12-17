@@ -236,10 +236,10 @@ public class WaveReader {
         if (ret == -1) {
             return -1;
         } else {
-            return (buf[0] & 0xFF << 24
+            return (((buf[0] & 0xFF) << 24)
                     | ((buf[1] & 0xFF) << 16)
                     | ((buf[2] & 0xFF) << 8)
-                    | ((buf[3] & 0xFF)));
+                    | (buf[3] & 0xFF));
         }
     }
     
