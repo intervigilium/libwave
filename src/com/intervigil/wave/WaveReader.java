@@ -41,14 +41,32 @@ public class WaveReader {
     private int mFileSize;
     private int mDataSize;
 
+
+    /**
+     * Constructor; initializes WaveReader to read from given file
+     *
+     * @param path  path to input file
+     * @param name  name of input file
+     */
     public WaveReader(String path, String name) {
         input = new File(path + File.separator + name);
     }
 
+    /**
+     * Constructor; initializes WaveReader to read from given file
+     *
+     * @param file  handle to input file
+     */
     public WaveReader(File file) {
         input = file;
     }
 
+    /**
+     * Open WAV file for reading
+     *
+     * @throws FileNotFoundException if input file does not exist
+     * @throws IOException if WAV header information is invalid
+     */
     public void openWave() throws FileNotFoundException, IOException {
         FileInputStream fileStream = new FileInputStream(input);
         inputStream = new BufferedInputStream(fileStream, STREAM_BUFFER_SIZE);
@@ -88,83 +106,165 @@ public class WaveReader {
         mDataSize = readUnsignedIntLE(inputStream);
     }
 
+    /**
+     * Get sample rate
+     *
+     * @return input file's sample rate
+     */
     public int getSampleRate() {
-        // returns sample rate, typically 22050
         return mSampleRate;
     }
 
+    /**
+     * Get number of channels
+     *
+     * @return number of channels in input file
+     */
     public int getChannels() {
-        // returns number of channels, mono or stereo
         return mChannels;
     }
 
+    /**
+     * Get PCM format, S16LE or S8LE
+     *
+     * @return number of bits per sample
+     */
     public int getPcmFormat() {
-        // returns PCM format, typically 16 bit PCM
         return mSampleBits;
     }
     
+    /**
+     * Get file size
+     *
+     * @return total input file size in bytes
+     */
     public int getFileSize() {
-        // return file size + 8 bytes for (header chunk ID + file size) fields
         return mFileSize + 8;
     }
 
+    /**
+     * Get input file's audio data size
+     * Basically file size without headers included
+     *
+     * @return audio data size in bytes
+     */
     public int getDataSize() {
-        // returns number of bytes of sound data
         return mDataSize;
     }
 
+    /**
+     * Get input file length
+     *
+     * @return length of file in seconds
+     */
     public int getLength() {
-        // returns length in seconds
         if (mSampleRate == 0 || mChannels == 0 || (mSampleBits + 7) / 8 == 0) {
             return 0;
         } else {
-            return mDataSize
-                    / (mSampleRate * mChannels * ((mSampleBits + 7) / 8));
+            return mDataSize / (mSampleRate * mChannels * ((mSampleBits + 7) / 8));
         }
     }
 
-    public int readShort(short[] outBuf, int numSamples) throws IOException {
-        byte[] buf = new byte[numSamples * 2];
-        int bytesRead = inputStream.read(buf);
-
-        int outIndex = 0;
-        for (int i = 0; i < bytesRead; i += 2) {
-            outBuf[outIndex] = (short) ((0xff & buf[i]) | ((0xff & buf[i + 1]) << 8));
-            outIndex++;
+    /**
+     * Read audio data from input file (mono)
+     *
+     * @param dst  mono audio data output buffer
+     * @param numSamples  number of samples to read
+     *
+     * @return number of samples read
+     *
+     * @throws IOException if file I/O error occurs
+     */
+    public int readShort(short[] dst, int numSamples) throws IOException {
+        if (mChannels != 1) {
+            return -1;
         }
-
-        return outIndex;
+        int index;
+        for (index = 0; index < numSamples; index++) {
+            short val = readUnsignedShortLE(inputStream);
+            if (val == -1) {
+                break;
+            }
+            dst[index] = val;
+        }
+        return index;
     }
-    
+
+    /**
+     * Read audio data from input file (stereo)
+     *
+     * @param left  left channel audio output buffer
+     * @param right  right channel audio output buffer
+     * @param numSamples  number of samples to read
+     *
+     * @return number of samples read
+     *
+     * @throws IOException if file I/O error occurs
+     */
     public int readShort(short[] left, short[] right, int numSamples) throws IOException {
-        return 0;
+        if (mChannels != 2) {
+            return -1;
+        }
+        int index;
+        for (index = 0; index < numSamples * 2; index++) {
+            short val = readUnsignedShortLE(inputStream);
+            if (val == -1) {
+                break;
+            }
+            if (index % 2 == 0) {
+                left[index] = val;
+            } else {
+                right[index] = val;
+            }
+        }
+        return index;
     }
 
+    /**
+     * Close WAV file. WaveReader object cannot be used again following this call.
+     *
+     * @throws IOException if I/O error occurred closing filestream
+     */
     public void closeWaveFile() throws IOException {
         inputStream.close();
     }
     
     private static int readUnsignedInt(BufferedInputStream in) throws IOException {
+        int ret;
         byte[] buf = new byte[4];
-        in.read(buf);
-        return (buf[0] & 0xFF << 24
-                | ((buf[1] & 0xFF) << 16)
-                | ((buf[2] & 0xFF) << 8)
-                | ((buf[3] & 0xFF)));
+        ret = in.read(buf);
+        if (ret == -1) {
+            return -1;
+        } else {
+            return (buf[0] & 0xFF << 24
+                    | ((buf[1] & 0xFF) << 16)
+                    | ((buf[2] & 0xFF) << 8)
+                    | ((buf[3] & 0xFF)));
+        }
     }
     
     private static int readUnsignedIntLE(BufferedInputStream in) throws IOException {
+        int ret;
         byte[] buf = new byte[4];
-        in.read(buf);
-        return (buf[0] & 0xFF
-                | ((buf[1] & 0xFF) << 8)
-                | ((buf[2] & 0xFF) << 16)
-                | ((buf[3] & 0xFF) << 24));
+        ret = in.read(buf);
+        if (ret == -1) {
+            return -1;
+        } else {
+            return (buf[0] & 0xFF
+                    | ((buf[1] & 0xFF) << 8)
+                    | ((buf[2] & 0xFF) << 16)
+                    | ((buf[3] & 0xFF) << 24));
+        }
     }
     
     private static short readUnsignedShortLE(BufferedInputStream in) throws IOException {
+        int ret;
         byte[] buf = new byte[2];
-        in.read(buf);
-        return (short) (buf[0] & 0xFF | ((buf[1] & 0xFF) << 8));
+        ret = in.read(buf);
+        if (ret == -1) {
+            return -1;
+        } else {
+            return (short) (buf[0] & 0xFF | ((buf[1] & 0xFF) << 8));
+        }
     }
 }
