@@ -73,7 +73,7 @@ public class WaveReader {
 
         int headerId = readUnsignedInt(mInStream);  // should be "RIFF"
         if (headerId != WAV_HEADER_CHUNK_ID) {
-            throw new IOException("WaveReader: Invalid header chunk ID");
+            throw new IOException(String.format("WaveReader: Invalid header chunk ID: %d", headerId));
         }
         mFileSize = readUnsignedIntLE(mInStream);  // length of header
         int format = readUnsignedInt(mInStream);  // should be "WAVE"
