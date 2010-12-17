@@ -23,7 +23,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.RandomAccessFile;
 
 public class WaveWriter {
@@ -77,7 +76,7 @@ public class WaveWriter {
 
     public void write(short[] buffer, int bufferSize) throws IOException {
         for (int i = 0; i < bufferSize; i++) {
-            write16BitsLowHigh(this.outputStream, buffer[i]);
+            writeUnsignedShortLE(this.outputStream, buffer[i]);
             bytesWritten += 2;
         }
     }
@@ -127,7 +126,7 @@ public class WaveWriter {
         file = null;
     }
 
-    private static void write16BitsLowHigh(OutputStream stream, short sample)
+    private static void writeUnsignedShortLE(BufferedOutputStream stream, short sample)
             throws IOException {
         // write already writes the lower order byte of this short
         stream.write(sample);
