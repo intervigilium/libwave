@@ -37,6 +37,15 @@ public class WaveWriter {
     private int sampleBits;
 
 
+    /**
+     * Constructor; initializes WaveWriter with file name and path
+     *
+     * @param path  output file path
+     * @param name  output file name
+     * @param sampleRate  output sample rate
+     * @param channels  number of channels
+     * @param sampleBits  number of bits per sample (S8LE, S16LE)
+     */
     public WaveWriter(String path, String name, int sampleRate, int channels,
             int sampleBits) {
         this.output = new File(path + File.separator + name);
@@ -48,8 +57,16 @@ public class WaveWriter {
         this.bytesWritten = 0;
     }
 
-    public WaveWriter(File out, int sampleRate, int channels, int sampleBits) {
-        this.output = out;
+    /**
+     * Constructor; initializes WaveWriter with file name and path
+     *
+     * @param file  output file handle
+     * @param sampleRate  output sample rate
+     * @param channels  number of channels
+     * @param sampleBits  number of bits per sample (S8LE, S16LE)
+     */
+    public WaveWriter(File file, int sampleRate, int channels, int sampleBits) {
+        this.output = file;
 
         this.sampleRate = sampleRate;
         this.channels = channels;
@@ -58,13 +75,19 @@ public class WaveWriter {
         this.bytesWritten = 0;
     }
 
+    /**
+     * Create output WAV file
+     *
+     * @return whether file creation succeeded
+     *
+     * @throws IOException if file I/O error occurs allocating header
+     */
     public boolean createWaveFile() throws IOException {
         if (this.output.exists()) {
             this.output.delete();
         }
 
         if (this.output.createNewFile()) {
-            // create file, set up output stream
             FileOutputStream fileStream = new FileOutputStream(output);
             this.outputStream = new BufferedOutputStream(fileStream,
                     OUTPUT_STREAM_BUFFER);
@@ -75,15 +98,28 @@ public class WaveWriter {
         return false;
     }
 
-    public void write(short[] buffer, int bufferSize) throws IOException {
+    /**
+     * Read audio data from input file (mono)
+     *
+     * @param src  mono audio data input buffer
+     * @param bufferSize  buffer size in number of samples
+     *
+     * @throws IOException if file I/O error occurs
+     */
+    public void write(short[] src, int bufferSize) throws IOException {
         for (int i = 0; i < bufferSize; i++) {
-            writeUnsignedShortLE(this.outputStream, buffer[i]);
+            writeUnsignedShortLE(this.outputStream, src[i]);
             bytesWritten += 2;
         }
     }
 
+    /**
+     * Close output WAV file and write WAV header. WaveWriter
+     * cannot be used again following this call.
+     *
+     * @throws IOException if file I/O error occurs writing WAV header
+     */
     public void closeWaveFile() throws IOException {
-        // close output stream then rewind and write wave header
         this.outputStream.flush();
         this.outputStream.close();
         writeWaveHeader();
