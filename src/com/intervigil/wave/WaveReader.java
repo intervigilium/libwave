@@ -49,7 +49,7 @@ public class WaveReader {
      * @param name  name of input file
      */
     public WaveReader(String path, String name) {
-        mInFile = new File(path + File.separator + name);
+        this.mInFile = new File(path + File.separator + name);
     }
 
     /**
@@ -58,7 +58,7 @@ public class WaveReader {
      * @param file  handle to input file
      */
     public WaveReader(File file) {
-        mInFile = file;
+        this.mInFile = file;
     }
 
     /**

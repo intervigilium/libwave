@@ -84,16 +84,15 @@ public class WaveWriter {
      * @throws IOException if file I/O error occurs allocating header
      */
     public boolean createWaveFile() throws IOException {
-        if (this.mOutFile.exists()) {
-            this.mOutFile.delete();
+        if (mOutFile.exists()) {
+            mOutFile.delete();
         }
 
-        if (this.mOutFile.createNewFile()) {
+        if (mOutFile.createNewFile()) {
             FileOutputStream fileStream = new FileOutputStream(mOutFile);
-            this.mOutStream = new BufferedOutputStream(fileStream,
-                    OUTPUT_STREAM_BUFFER);
+            mOutStream = new BufferedOutputStream(fileStream, OUTPUT_STREAM_BUFFER);
             // write 44 bytes of space for the header
-            this.mOutStream.write(new byte[44]);
+            mOutStream.write(new byte[44]);
             return true;
         }
         return false;
@@ -113,7 +112,7 @@ public class WaveWriter {
             return;
         }
         for (int i = 0; i < bufferSize; i++) {
-            writeUnsignedShortLE(this.mOutStream, src[i]);
+            writeUnsignedShortLE(mOutStream, src[i]);
             mBytesWritten += 2;
         }
     }
@@ -133,7 +132,7 @@ public class WaveWriter {
             return;
         }
         for (int i = 0; i < bufferSize; i++) {
-            writeUnsignedShortLE(this.mOutStream, left[i]);
+            writeUnsignedShortLE(mOutStream, left[i]);
             writeUnsignedShortLE(mOutStream, right[i]);
             mBytesWritten += 4;
         }
