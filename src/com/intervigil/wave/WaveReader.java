@@ -175,7 +175,7 @@ public class WaveReader {
      *
      * @throws IOException if file I/O error occurs
      */
-    public int readShort(short[] dst, int numSamples) throws IOException {
+    public int read(short[] dst, int numSamples) throws IOException {
         if (mChannels != 1) {
             return -1;
         }
@@ -201,7 +201,7 @@ public class WaveReader {
      *
      * @throws IOException if file I/O error occurs
      */
-    public int readShort(short[] left, short[] right, int numSamples) throws IOException {
+    public int read(short[] left, short[] right, int numSamples) throws IOException {
         if (mChannels != 2) {
             return -1;
         }
