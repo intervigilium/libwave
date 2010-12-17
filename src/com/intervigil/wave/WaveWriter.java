@@ -36,8 +36,10 @@ public class WaveWriter {
     private int channels;
     private int sampleBits;
 
-    public WaveWriter(File out, int sampleRate, int channels, int sampleBits) {
-        this.output = out;
+
+    public WaveWriter(String path, String name, int sampleRate, int channels,
+            int sampleBits) {
+        this.output = new File(path + File.separator + name);
 
         this.sampleRate = sampleRate;
         this.channels = channels;
@@ -46,9 +48,8 @@ public class WaveWriter {
         this.bytesWritten = 0;
     }
 
-    public WaveWriter(String path, String name, int sampleRate, int channels,
-            int sampleBits) {
-        this.output = new File(path + File.separator + name);
+    public WaveWriter(File out, int sampleRate, int channels, int sampleBits) {
+        this.output = out;
 
         this.sampleRate = sampleRate;
         this.channels = channels;
