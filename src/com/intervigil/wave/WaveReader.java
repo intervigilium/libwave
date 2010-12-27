@@ -205,16 +205,17 @@ public class WaveReader {
         if (mChannels != 2) {
             return -1;
         }
-        int index;
-        for (index = 0; index < numSamples * 2; index++) {
+        int index = 0;
+        for (int i = 0; i < numSamples * 2; i++) {
             short val = readUnsignedShortLE(mInStream);
             if (val == -1) {
                 break;
             }
-            if (index % 2 == 0) {
+            if (i % 2 == 0) {
                 left[index] = val;
             } else {
                 right[index] = val;
+                index++;
             }
         }
         return index;
