@@ -103,15 +103,19 @@ public class WaveWriter {
      * nothing if output file is not mono channel.
      *
      * @param src  mono audio data input buffer
-     * @param bufferSize  buffer size in number of samples
+     * @param offset offset into src buffer
+     * @param length  buffer size in number of samples
      *
      * @throws IOException if file I/O error occurs
      */
-    public void write(short[] src, int bufferSize) throws IOException {
+    public void write(short[] src, int offset, int length) throws IOException {
         if (mChannels != 1) {
             return;
         }
-        for (int i = 0; i < bufferSize; i++) {
+        if (offset > length) {
+            throw new IndexOutOfBoundsException(String.format("offset %d is greater than length %d", offset, length));
+        }
+        for (int i = offset; i < length; i++) {
             writeUnsignedShortLE(mOutStream, src[i]);
             mBytesWritten += 2;
         }
@@ -123,15 +127,19 @@ public class WaveWriter {
      *
      * @param left  left channel audio data buffer
      * @param right  right channel audio data buffer
-     * @param bufferSize  buffer size in number of samples
+     * @param offset  offset into left/right buffers
+     * @param length  buffer size in number of samples
      *
      * @throws IOException if file I/O error occurs
      */
-    public void write(short[] left, short[] right, int bufferSize) throws IOException {
+    public void write(short[] left, short[] right, int offset, int length) throws IOException {
         if (mChannels != 2) {
             return;
         }
-        for (int i = 0; i < bufferSize; i++) {
+        if (offset > length) {
+            throw new IndexOutOfBoundsException(String.format("offset %d is greater than length %d", offset, length));
+        }
+        for (int i = offset; i < length; i++) {
             writeUnsignedShortLE(mOutStream, left[i]);
             writeUnsignedShortLE(mOutStream, right[i]);
             mBytesWritten += 4;
