@@ -227,7 +227,9 @@ public class WaveReader {
      * @throws IOException if I/O error occurred closing filestream
      */
     public void closeWaveFile() throws IOException {
-        mInStream.close();
+        if (mInStream != null) {
+            mInStream.close();
+        }
     }
     
     private static int readUnsignedInt(BufferedInputStream in) throws IOException {
