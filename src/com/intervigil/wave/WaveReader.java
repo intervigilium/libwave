@@ -25,6 +25,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import com.intervigil.wave.exception.InvalidWaveException;
+
 public class WaveReader {
     private static final int WAV_HEADER_CHUNK_ID = 0x52494646;  // "RIFF"
     private static final int WAV_FORMAT = 0x57415645;  // "WAVE"
@@ -65,25 +67,26 @@ public class WaveReader {
      * Open WAV file for reading
      *
      * @throws FileNotFoundException if input file does not exist
-     * @throws IOException if WAV header information is invalid
+     * @throws InvalidWaveException if input file is not a valid WAVE file
+     * @throws IOException if I/O error occurred during file read
      */
-    public void openWave() throws FileNotFoundException, IOException {
+    public void openWave() throws FileNotFoundException, InvalidWaveException, IOException {
         FileInputStream fileStream = new FileInputStream(mInFile);
         mInStream = new BufferedInputStream(fileStream, STREAM_BUFFER_SIZE);
 
         int headerId = readUnsignedInt(mInStream);  // should be "RIFF"
         if (headerId != WAV_HEADER_CHUNK_ID) {
-            throw new IOException(String.format("WaveReader: Invalid header chunk ID: %d", headerId));
+            throw new InvalidWaveException(String.format("Invalid WAVE header chunk ID: %d", headerId));
         }
         mFileSize = readUnsignedIntLE(mInStream);  // length of header
         int format = readUnsignedInt(mInStream);  // should be "WAVE"
         if (format != WAV_FORMAT) {
-            throw new IOException("WaveReader: Invalid format");
+            throw new InvalidWaveException("Invalid WAVE format");
         }
         
         int formatId = readUnsignedInt(mInStream);  // should be "fmt "
         if (formatId != WAV_FORMAT_CHUNK_ID) {
-            throw new IOException("WaveReader: Invalid format chunk ID");
+            throw new InvalidWaveException("Invalid WAVE format chunk ID");
         }
         int formatSize = readUnsignedIntLE(mInStream);
         if (formatSize != 16) {
@@ -91,7 +94,7 @@ public class WaveReader {
         }
         int audioFormat = readUnsignedShortLE(mInStream);
         if (audioFormat != 1) {
-            throw new IOException("WaveReader: Unable to read non-PCM WAV files");
+            throw new InvalidWaveException("Not PCM WAVE format");
         }
         mChannels = readUnsignedShortLE(mInStream);
         mSampleRate = readUnsignedIntLE(mInStream);
@@ -101,7 +104,7 @@ public class WaveReader {
         
         int dataId = readUnsignedInt(mInStream);
         if (dataId != WAV_DATA_CHUNK_ID) {
-            throw new IOException("WaveReader: Invalid data chunk ID");
+            throw new InvalidWaveException("Invalid WAVE data chunk ID");
         }
         mDataSize = readUnsignedIntLE(mInStream);
     }
