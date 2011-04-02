@@ -153,8 +153,10 @@ public class WaveWriter {
      * @throws IOException if file I/O error occurs writing WAV header
      */
     public void closeWaveFile() throws IOException {
-        this.mOutStream.flush();
-        this.mOutStream.close();
+        if (mOutStream != null) {
+            this.mOutStream.flush();
+            this.mOutStream.close();
+        }
         writeWaveHeader();
     }
 
