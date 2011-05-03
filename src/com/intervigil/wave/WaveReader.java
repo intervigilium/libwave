@@ -182,14 +182,16 @@ public class WaveReader {
         if (mChannels != 1) {
             return -1;
         }
-        int index;
-        for (index = 0; index < numSamples; index++) {
-            short val = readUnsignedShortLE(mInStream);
-            if (val == -1) {
-                break;
-            }
-            dst[index] = val;
+
+        byte[] buf = new byte[numSamples * 2];
+        int index = 0;
+        int bytesRead = mInStream.read(buf, 0, numSamples * 2);
+
+        for (int i = 0; i < bytesRead; i+=2) {
+            dst[index] = byteToShortLE(buf[i], buf[i+1]);
+            index++;
         }
+
         return index;
     }
 
@@ -208,19 +210,20 @@ public class WaveReader {
         if (mChannels != 2) {
             return -1;
         }
+        byte[] buf = new byte[numSamples * 4];
         int index = 0;
-        for (int i = 0; i < numSamples * 2; i++) {
-            short val = readUnsignedShortLE(mInStream);
-            if (val == -1) {
-                break;
-            }
-            if (i % 2 == 0) {
+        int bytesRead = mInStream.read(buf, 0, numSamples * 4);
+
+        for (int i = 0; i < bytesRead; i+=2) {
+            short val = byteToShortLE(buf[0], buf[i+1]);
+            if (i % 4 == 0) {
                 left[index] = val;
             } else {
                 right[index] = val;
                 index++;
             }
         }
+
         return index;
     }
 
@@ -235,6 +238,10 @@ public class WaveReader {
         }
     }
     
+    private static short byteToShortLE(byte b1, byte b2) {
+        return (short) (b1 & 0xFF | ((b2 & 0xFF) << 8));
+    }
+
     private static int readUnsignedInt(BufferedInputStream in) throws IOException {
         int ret;
         byte[] buf = new byte[4];
