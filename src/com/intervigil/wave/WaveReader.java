@@ -273,11 +273,11 @@ public class WaveReader {
     private static short readUnsignedShortLE(BufferedInputStream in) throws IOException {
         int ret;
         byte[] buf = new byte[2];
-        ret = in.read(buf);
+        ret = in.read(buf, 0, 2);
         if (ret == -1) {
             return -1;
         } else {
-            return (short) (buf[0] & 0xFF | ((buf[1] & 0xFF) << 8));
+            return byteToShortLE(buf[0], buf[1]);
         }
     }
 }
